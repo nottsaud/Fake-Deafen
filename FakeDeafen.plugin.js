@@ -186,11 +186,11 @@ module.exports=(function(){
     this._hw=_hw;
     var _sk=BdApi.Data.load('FakeDeafen','key');
     if(!_sk){
-      BdApi.UI.showToast('🔑 FakeDeafen: ادخل الـ License Key في الإعدادات',{type:'warning',timeout:0});
+      BdApi.UI.showToast('🔑 FakeDeafen: Enter your License Key in settings',{type:'warning',timeout:0});
       return;
     }
     this._key=_sk;
-    BdApi.UI.showToast('🔄 FakeDeafen: جاري التحقق...',{type:'info',timeout:2000});
+    BdApi.UI.showToast('🔄 FakeDeafen: Verifying...',{type:'info',timeout:2000});
     try{
       var pl={key:_sk,hwid:_hw};
       var sg=await _xoQEQqx_(pl);
@@ -204,14 +204,14 @@ module.exports=(function(){
       var dt=await res.json();
       if(!dt.ok){
         var em={
-          invalid_key:'❌ الـ Key غير صحيح',
-          revoked:'🚫 تم إيقاف تفعيلك — تواصل مع @overratedsaud',
-          hwid_mismatch:'⛔ هذا الـ Key مفعّل على جهاز آخر',
-          killed:'🔴 الخدمة موقفة — تواصل مع @overratedsaud',
-          expired:'⏰ انتهت صلاحية الـ Key — جدّد من @overratedsaud',
-          invalid_sig:'⛔ طلب غير موثق',replay_attack:'⛔ طلب منتهي'
+          invalid_key:'❌ Invalid license key',
+          revoked:'🚫 Your license has been revoked — contact @overratedsaud',
+          hwid_mismatch:'⛔ Key is activated on another device',
+          killed:'🔴 Service disabled — contact @overratedsaud',
+          expired:'⏰ License expired — renew via @overratedsaud',
+          invalid_sig:'⛔ Unsigned request',replay_attack:'⛔ Request expired'
         };
-        BdApi.UI.showToast(em[dt.error]||'❌ خطأ',{type:'error',timeout:0});
+        BdApi.UI.showToast(em[dt.error]||'❌ Unknown error',{type:'error',timeout:0});
         return;
       }
       // حفظ الـ token في الذاكرة فقط — لا يُخزَّن على القرص
@@ -223,10 +223,10 @@ module.exports=(function(){
       void(_pwi_=758);
       this._setupPatches();
       this._startRenewal();
-      var expMsg=dt.expiresAt?(' | ينتهي: '+new Date(dt.expiresAt).toLocaleDateString('ar')):'';
+      var expMsg=dt.expiresAt?(' | Expires: '+new Date(dt.expiresAt).toLocaleDateString('en')):'';
       BdApi.UI.showToast('🎧 FakeDeafen v8 — Verified ✅'+expMsg,{type:'success',timeout:4000});
     }catch(e){
-      BdApi.UI.showToast('🌐 FakeDeafen: فشل الاتصال بالسيرفر',{type:'error',timeout:5000});
+      BdApi.UI.showToast('🌐 FakeDeafen: Connection failed',{type:'error',timeout:5000});
       console.error('[FakeDeafen] Error:',e);
     }
   };
@@ -238,7 +238,7 @@ module.exports=(function(){
     this._patches.forEach(function(fn){try{fn();}catch(_){}});
     this._token=null;this._loaded=false;this._patches=[];
     if(window.__fdGainPatched){window.__fdGainPatched=false;}
-    BdApi.UI.showToast('FakeDeafen — موقف',{type:'error',timeout:2000});
+    BdApi.UI.showToast('FakeDeafen — Stopped',{type:'error',timeout:2000});
   };
 
   _FD.prototype.getSettingsPanel=function(){
@@ -254,18 +254,18 @@ module.exports=(function(){
     if(_lk&&_exp){
       var _exd=new Date(_exp),_now=new Date();
       var _diff=Math.ceil((_exd-_now)/86400000);
-      if(_diff<=0)_expLabel='⏰ انتهت الصلاحية';
-      else if(_diff<=7)_expLabel='⚠️ ينتهي خلال '+_diff+' يوم';
-      else _expLabel='📅 ينتهي: '+_exd.toLocaleDateString('ar');
+      if(_diff<=0)_expLabel='⏰ Expired';
+      else if(_diff<=7)_expLabel='⚠️ Expires in '+_diff+' days';
+      else _expLabel='📅 Expires: '+_exd.toLocaleDateString('en');
     }else if(_lk){_expLabel='♾️ Lifetime';}
 
     var _sc=_ld?'#43b581':(_lk?'#faa61a':'#f04747');
-    var _st=_ld?'✅ مفعّل وشغّال':(_lk?'⏳ مفعّل — أعد تشغيل البلوقن':'❌ غير مفعّل');
+    var _st=_ld?'✅ Active':(_lk?'⏳ Activated — restart plugin':'❌ Not activated');
     var _sui='<div style=\"background:var(--background-secondary);border-radius:10px;padding:12px 16px;margin-bottom:10px;text-align:center\"><span style=\"font-size:13px\">Status: <b style=\"color:'+_sc+'\">'+_st+'</b></span></div>';
 
-    var _licUI=_lk ? "<div style=\"background:var(--background-secondary);border-radius:10px;padding:16px;margin-bottom:10px;border-left:3px solid #43b581;text-align:center\"><div style=\"font-size:32px;margin-bottom:6px\">✅</div><div style=\"font-size:15px;font-weight:800;color:#43b581;margin-bottom:4px\">License Activated</div><div id=\"fd-expiry\" style=\"font-size:12px;color:#faa61a;margin-bottom:10px\"></div><div style=\"position:relative\"><input type=\"text\" id=\"fd-key-disp\" readonly disabled style=\"width:100%;box-sizing:border-box;background:rgba(67,181,129,0.08);border:1px solid rgba(67,181,129,0.3);border-radius:6px;padding:8px 40px 8px 12px;color:#43b581;font-size:13px;font-family:monospace;outline:none;cursor:not-allowed;opacity:0.8;text-align:center;\"><span style=\"position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px\">🔒</span></div><div style=\"font-size:11px;color:var(--text-muted);margin-top:8px\">مقيّد بجهازك — لا يمكن نقله</div></div>" : ("<div style=\"background:var(--background-secondary);border-radius:10px;padding:16px;margin-bottom:10px;border-left:3px solid #faa61a;text-align:center\"><div style=\"font-size:26px;margin-bottom:8px\">🛒</div><div style=\"font-size:14px;font-weight:800;color:#faa61a;margin-bottom:8px\">للشراء تواصل معنا</div><div style=\"font-size:15px;color:var(--text-normal);margin-bottom:4px\">Discord: <b style=\"color:#43b581\">@overratedsaud</b></div><div style=\"font-size:11px;color:var(--text-muted);margin-top:8px\">بعد الشراء أدخل الـ Key أدناه</div></div>"+"<div style=\"background:var(--background-secondary);border-radius:10px;padding:14px 16px;margin-bottom:10px;border-left:3px solid #43b581\"><div style=\"font-weight:700;margin-bottom:8px;font-size:13px\">🔑 License Key</div><input id=\"fd-key\" type=\"text\" placeholder=\"ALPHA-XXXX-XXXX-XXXX\" style=\"width:100%;box-sizing:border-box;background:var(--background-tertiary);border:1px solid rgba(67,181,129,0.4);border-radius:6px;padding:8px 12px;color:var(--text-normal);font-size:13px;font-family:monospace;outline:none;\"><button id=\"fd-save\" style=\"margin-top:8px;width:100%;padding:8px;background:#43b581;border:none;border-radius:6px;color:white;font-weight:700;cursor:pointer;font-size:13px;\">حفظ وتفعيل</button></div>");
+    var _licUI=_lk ? "<div style=\"background:var(--background-secondary);border-radius:10px;padding:16px;margin-bottom:10px;border-left:3px solid #43b581;text-align:center\"><div style=\"font-size:32px;margin-bottom:6px\">✅</div><div style=\"font-size:15px;font-weight:800;color:#43b581;margin-bottom:4px\">License Activated</div><div id=\"fd-expiry\" style=\"font-size:12px;color:#faa61a;margin-bottom:10px\"></div><div style=\"position:relative\"><input type=\"text\" id=\"fd-key-disp\" readonly disabled style=\"width:100%;box-sizing:border-box;background:rgba(67,181,129,0.08);border:1px solid rgba(67,181,129,0.3);border-radius:6px;padding:8px 40px 8px 12px;color:#43b581;font-size:13px;font-family:monospace;outline:none;cursor:not-allowed;opacity:0.8;text-align:center;\"><span style=\"position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px\">🔒</span></div><div style=\"font-size:11px;color:var(--text-muted);margin-top:8px\">Locked to this device</div></div>" : ("<div style=\"background:var(--background-secondary);border-radius:10px;padding:16px;margin-bottom:10px;border-left:3px solid #faa61a;text-align:center\"><div style=\"font-size:26px;margin-bottom:8px\">🛒</div><div style=\"font-size:14px;font-weight:800;color:#faa61a;margin-bottom:8px\">Purchase a license</div><div style=\"font-size:15px;color:var(--text-normal);margin-bottom:4px\">Discord: <b style=\"color:#43b581\">@overratedsaud</b></div><div style=\"font-size:11px;color:var(--text-muted);margin-top:8px\">Enter your key below after purchase</div></div>"+"<div style=\"background:var(--background-secondary);border-radius:10px;padding:14px 16px;margin-bottom:10px;border-left:3px solid #43b581\"><div style=\"font-weight:700;margin-bottom:8px;font-size:13px\">🔑 License Key</div><input id=\"fd-key\" type=\"text\" placeholder=\"ALPHA-XXXX-XXXX-XXXX\" style=\"width:100%;box-sizing:border-box;background:var(--background-tertiary);border:1px solid rgba(67,181,129,0.4);border-radius:6px;padding:8px 12px;color:var(--text-normal);font-size:13px;font-family:monospace;outline:none;\"><button id=\"fd-save\" style=\"margin-top:8px;width:100%;padding:8px;background:#43b581;border:none;border-radius:6px;color:white;font-weight:700;cursor:pointer;font-size:13px;\">Save & Activate</button></div>");
 
-    wrap.innerHTML="<div style=\"background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);border-radius:12px;padding:20px;margin-bottom:14px;text-align:center;border:1px solid rgba(67,181,129,0.3)\"><div style=\"font-size:28px;margin-bottom:4px\">🎧</div><div style=\"font-size:20px;font-weight:800;color:#43b581;letter-spacing:2px\">FAKE DEAFEN</div><div style=\"font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px\">by <span style=\"color:#43b581;font-weight:700\">Alpha</span> &nbsp;•&nbsp; v8.0.0</div></div>"+_licUI+"<div style=\"background:var(--background-secondary);border-radius:10px;padding:12px 16px;margin-bottom:10px\"><div style=\"font-size:11px;color:var(--text-muted);margin-bottom:6px\">🖥️ Device ID (HWID)</div><div id=\"fd-hwid\" style=\"font-family:monospace;font-size:11px;color:#43b581;word-break:break-all;letter-spacing:1px\">جاري التحميل...</div></div>"+_sui+"<div style=\"background:var(--background-secondary);border-radius:8px;padding:10px 14px;text-align:center;font-size:12px;color:var(--text-muted);border-top:2px solid rgba(67,181,129,0.2)\">© <span style=\"color:#43b581;font-weight:700\">Alpha</span> — All Rights Reserved<br><span style=\"font-size:11px;color:rgba(255,255,255,0.4)\">Discord: @overratedsaud</span></div>";
+    wrap.innerHTML="<div style=\"background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);border-radius:12px;padding:20px;margin-bottom:14px;text-align:center;border:1px solid rgba(67,181,129,0.3)\"><div style=\"font-size:28px;margin-bottom:4px\">🎧</div><div style=\"font-size:20px;font-weight:800;color:#43b581;letter-spacing:2px\">FAKE DEAFEN</div><div style=\"font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px\">by <span style=\"color:#43b581;font-weight:700\">Alpha</span> &nbsp;•&nbsp; v8.0.0</div></div>"+_licUI+"<div style=\"background:var(--background-secondary);border-radius:10px;padding:12px 16px;margin-bottom:10px\"><div style=\"font-size:11px;color:var(--text-muted);margin-bottom:6px\">🖥️ Device ID (HWID)</div><div id=\"fd-hwid\" style=\"font-family:monospace;font-size:11px;color:#43b581;word-break:break-all;letter-spacing:1px\">Loading...</div></div>"+_sui+"<div style=\"background:var(--background-secondary);border-radius:8px;padding:10px 14px;text-align:center;font-size:12px;color:var(--text-muted);border-top:2px solid rgba(67,181,129,0.2)\">© <span style=\"color:#43b581;font-weight:700\">Alpha</span> — All Rights Reserved<br><span style=\"font-size:11px;color:rgba(255,255,255,0.4)\">Discord: @overratedsaud</span></div>";
 
     if(_lk){
       var _kd=wrap.querySelector('#fd-key-disp');if(_kd)_kd.value=_key;
@@ -281,7 +281,7 @@ module.exports=(function(){
         var k=wrap.querySelector('#fd-key').value.trim();
         if(!k)return;
         BdApi.Data.save('FakeDeafen','key',k);
-        BdApi.UI.showToast('✅ تم الحفظ — أعد تشغيل البلوقن',{type:'success'});
+        BdApi.UI.showToast('✅ Saved — restart the plugin',{type:'success'});
       });
     }
     return wrap;
